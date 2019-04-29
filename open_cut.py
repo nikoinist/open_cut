@@ -4,15 +4,34 @@ from PIL import Image
 import os
 from shutils import resize
 import argparse
+from PyPDF2 import PdfFileReader
 
 ap = argparse.ArgumentParser()
 ap.add_argument("-d", "--dir", required = True, help="Working directory")
 ap.add_argument("-r", "--rotate", action='store_true', default=False, help="preform rotation when cutting")
+ap.add_argument("-p", "--pdf", action='store_true', default=False, help="create pdf file")
 #ap.add_argument("-c", "--cut_size", default=100, type=int , help="size of image to save when cut, in px")
 args = vars(ap.parse_args())
 
 working_dir = args["dir"]
 path = os.listdir(path = working_dir)
+
+
+def pdf(path, name):
+    im = Image.open(path+name)
+    print("spremam "+""+path+name)
+    #final = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+    #pl_index = final.quantize(colors=256, method=0, kmeans=0)    
+    make_directory(working_dir+"pdf")
+    im.save(working_dir+"pdf/"+name[0:-4]+".pdf", format='pdf', resolution=75, author="ZPPO")
+    print("spremljeno!")
+	
+def make_directory(path):
+        if not os.path.isdir(path):
+            print ("pravim direktorij {0}".format(path))
+            os.makedirs(path)
+        else:
+            return
 
 # funkcija za obradu i izrezivanje sekcija karte
 # func for processing and cutting map image sections
@@ -82,12 +101,7 @@ def open_cut(path, name):
 
     
 
-    def make_directory(path):
-        if not os.path.isdir(path):
-            print ("pravim direktorij {0}".format(path))
-            os.makedirs(path)
-        else:
-            return
+    
 
     for cn in c:
         rect = cv2.minAreaRect(cn)
@@ -141,5 +155,7 @@ def open_cut(path, name):
 for name in path:
     if name.lower().endswith(('.tif')) or name.lower().endswith(('.tiff')):
         print(name)
-        open_cut(working_dir, name)
-	
+        if args["pdf"] == True:
+            pdf(working_dir, name)
+        else:
+            open_cut(working_dir, name)
